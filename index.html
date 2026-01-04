@@ -21,6 +21,9 @@ h1{text-align:center;margin-bottom:40px}
     border-radius:16px;
     padding:25px;
     box-shadow:0 0 40px rgba(0,0,0,.8);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between
 }
 .icon{
     width:50px;height:50px;
@@ -29,24 +32,32 @@ h1{text-align:center;margin-bottom:40px}
     display:flex;align-items:center;justify-content:center;
     margin-bottom:20px
 }
+.card h2{margin:0 0 10px}
+.card p{color:#9da1a9;font-size:14px}
+
 .alert{
     margin:20px 0;
     padding:12px;
     border-radius:10px;
-    background:rgba(67,181,129,.15);
-    color:#43b581;
+    background:rgba(240,71,71,.15);
+    color:#f04747;
+    display:flex;
+    gap:8px;
+    font-size:14px
 }
+
 button{
     padding:12px;
     border-radius:10px;
     border:none;
     font-weight:bold;
     cursor:pointer;
+    font-size:15px
 }
-.btn-open{background:#2ea043;color:white}
+.btn-open{background:linear-gradient(135deg,#43b581,#2ea043);color:white}
+.btn-closed{background:#2b2d31;color:#72767d;cursor:not-allowed}
 .admin{margin-top:10px;background:#5865f2;color:white}
 
-/* MODAL */
 .modal{
     position:fixed;inset:0;
     background:rgba(0,0,0,.8);
@@ -64,7 +75,7 @@ button{
     max-height:80vh;
     overflow-y:auto;
 }
-label{display:block;margin-top:15px}
+label{display:block;margin-top:15px;font-size:14px}
 input, textarea{
     width:100%;
     padding:10px;
@@ -75,7 +86,6 @@ input, textarea{
     color:white;
 }
 .modal button{margin-top:20px;width:100%;background:#5865f2;color:white}
-.btn-eliminar{background:#f04747;color:white;padding:6px;border-radius:6px;margin-top:10px}
 </style>
 </head>
 
@@ -86,108 +96,81 @@ input, textarea{
 
 <div class="cards">
 <div class="card">
+<div>
 <div class="icon">📄</div>
 <h2>Rango SOPORTE</h2>
 <p>Postulación para formar parte del equipo de soporte.</p>
-<div class="alert">🟢 Postulación ABIERTA</div>
+<div class="alert" id="alert-soporte">🟢 Postulación ABIERTA</div>
+</div>
 <button class="btn-open" onclick="abrir()">Postularse</button>
-<button class="admin" onclick="mostrarPostulaciones()">Ver postulaciones (Admin)</button>
 </div>
 </div>
 </div>
 
 <div class="modal" id="modal">
 <div class="modal-content">
-<h3 id="modalTitle"></h3>
-<div id="questions"></div>
-<button onclick="enviar()">Enviar</button>
+<h3>Postulación - SOPORTE</h3>
+
+<label>Tu nombre de Discord:</label>
+<input id="discord">
+
+<label>¿Por qué quieres ser soporte?</label>
+<textarea id="motivo"></textarea>
+
+<label>¿Cuánto tiempo podrías dedicar?</label>
+<textarea id="tiempo"></textarea>
+
+<label>¿Tienes experiencia?</label>
+<textarea id="experiencia"></textarea>
+
+<button onclick="enviar()">Enviar Postulación</button>
 </div>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const firebaseConfig = {
-  apiKey: "PEGA_AQUI_TU_APIKEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROYECTO"
+const supabaseUrl = "https://bvbneelfosacutwhjzhx.supabase.co";
+const supabaseKey = "sb_publishable_8QluYXwqMPxYWszgJlCbzw_EdakwSl-";
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+window.abrir = () => {
+  document.getElementById("modal").style.display = "flex";
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+window.enviar = async () => {
+  const discord = document.getElementById("discord").value.trim();
+  const motivo = document.getElementById("motivo").value.trim();
+  const tiempo = document.getElementById("tiempo").value.trim();
+  const experiencia = document.getElementById("experiencia").value.trim();
 
-window.db = db;
-window.fb = { collection, addDoc, getDocs, deleteDoc, doc };
-</script>
+  if (!discord) {
+    alert("Debes poner tu Discord");
+    return;
+  }
 
-<script>
-const preguntas = [
-"Tu nombre de Discord:",
-"¿Por qué quieres ser soporte?",
-"¿Cuánto tiempo puedes dedicar?",
-"¿Tienes experiencia?"
-];
+  const { error } = await supabase.from("postulaciones").insert([{
+    rango: "soporte",
+    discord,
+    motivo,
+    tiempo,
+    experiencia
+  }]);
 
-const adminPassword = "1.21 #3 parcelas";
-
-function abrir(){
-  document.getElementById("modal").style.display="flex";
-  document.getElementById("modalTitle").textContent="Postulación SOPORTE";
-  const q=document.getElementById("questions");
-  q.innerHTML="";
-  preguntas.forEach(p=>{
-    q.innerHTML+=`<label>${p}</label><textarea required></textarea>`;
-  });
-}
-
-async function enviar(){
-  const inputs=document.querySelectorAll("#questions textarea");
-  const respuestas=[];
-  inputs.forEach(i=>respuestas.push(i.value.trim()));
-
-  if(!respuestas[0]){ alert("Completa todo"); return; }
-
-  await fb.addDoc(fb.collection(db,"postulaciones"),{
-    rango:"soporte",
-    respuestas,
-    fecha:new Date().toISOString()
-  });
-
-  document.getElementById("modal").style.display="none";
-  alert("Postulación enviada correctamente");
-}
-
-async function mostrarPostulaciones(){
-  const pass=prompt("Contraseña admin:");
-  if(pass!==adminPassword) return alert("Incorrecta");
-
-  const snap=await fb.getDocs(fb.collection(db,"postulaciones"));
-  let html="";
-  snap.forEach(d=>{
-    const data=d.data();
-    html+=`
-    <div style="border:1px solid #555;padding:10px;margin-bottom:10px">
-      ${data.respuestas.join("<br>")}
-      <button class="btn-eliminar" onclick="eliminar('${d.id}')">Eliminar</button>
-    </div>`;
-  });
-
-  document.getElementById("modalTitle").textContent="Postulaciones";
-  document.getElementById("questions").innerHTML=html||"No hay postulaciones";
-  document.getElementById("modal").style.display="flex";
-}
-
-async function eliminar(id){
-  if(!confirm("Eliminar?"))return;
-  await fb.deleteDoc(fb.doc(db,"postulaciones",id));
-  mostrarPostulaciones();
-}
+  if (error) {
+    alert("❌ Error al enviar");
+    console.error(error);
+  } else {
+    alert("✅ Postulación enviada y guardada");
+    document.getElementById("modal").style.display = "none";
+  }
+};
 </script>
 
 </body>
 </html>
+
+
 
 
 
