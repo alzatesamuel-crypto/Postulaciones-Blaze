@@ -34,7 +34,7 @@ button{
 }
 .btn{background:#43b581;color:#fff}
 
-input, textarea, select{
+textarea{
   width:100%;
   padding:10px;
   margin-top:10px;
@@ -42,12 +42,13 @@ input, textarea, select{
   border:none;
   background:#2b2d31;
   color:white;
+  min-height:90px;
 }
 
 .step{display:none}
 .step.active{display:block}
 
-/* ADMIN DISCRETO */
+/* ADMIN */
 #adminBtn{
   position:fixed;
   bottom:10px;
@@ -64,7 +65,7 @@ input, textarea, select{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.9);
+  background:rgba(0,0,0,.95);
   overflow:auto;
   padding:30px;
 }
@@ -86,18 +87,15 @@ input, textarea, select{
 <h1>Postulación Staff – The Blaze Java</h1>
 
 <div class="card">
-
 <div id="steps"></div>
-
 <button class="btn" onclick="next()">Continuar</button>
-
 </div>
 </div>
 
 <div id="adminBtn" onclick="adminLogin()"></div>
 
 <div id="adminPanel">
-<h2>Panel Admin</h2>
+<h2>Panel Admin – Postulaciones</h2>
 <div id="posts"></div>
 <button onclick="closeAdmin()">Cerrar</button>
 </div>
@@ -124,7 +122,7 @@ const preguntas = [
 ["edad","¿Cuántos años tienes?"],
 ["bots","Dime 10 bots que NO estén en TheBlaze"],
 ["staff_otro","¿Eres staff en otra network?"],
-["rol","¿Crees que los staff merecen su rango y rol?"],
+["rol","¿Crees que los staff merecen su rango?"],
 ["exp_staff","¿Tienes experiencia como staff?"],
 ["exp_prog","¿Tienes experiencia como programador?"],
 ["ilegal","Si alguien hace algo ilegal, ¿qué harías?"],
@@ -134,67 +132,93 @@ const preguntas = [
 ["corrupto","¿Qué harías si encuentras un staff corrupto?"]
 ];
 
-let step=0;
-let respuestas={};
+let step = 0;
+let respuestas = {};
 
-const stepsDiv=document.getElementById("steps");
+const stepsDiv = document.getElementById("steps");
 
 preguntas.forEach((p,i)=>{
-  stepsDiv.innerHTML+=`
+  stepsDiv.innerHTML += `
   <div class="step ${i===0?'active':''}" data-key="${p[0]}">
     <h3>${p[1]}</h3>
     <textarea></textarea>
   </div>`;
 });
 
-window.next=async()=>{
-  const actual=document.querySelector(".step.active");
-  const key=actual.dataset.key;
-  const val=actual.querySelector("textarea").value.trim();
-  if(!val){alert("Responde la pregunta");return;}
-  respuestas[key]=val;
+window.next = async () => {
+  const actual = document.querySelector(".step.active");
+  const key = actual.dataset.key;
+  const value = actual.querySelector("textarea").value.trim();
+
+  if(!value){
+    alert("Debes responder la pregunta");
+    return;
+  }
+
+  respuestas[key] = value;
   actual.classList.remove("active");
   step++;
-  if(step<preguntas.length){
+
+  if(step < preguntas.length){
     document.querySelectorAll(".step")[step].classList.add("active");
-  }else{
-    const {error}=await supabase.from("postulaciones").insert([{datos:respuestas}]);
-    if(error){alert("Error al enviar");console.error(error);}
-    else alert("Postulación enviada correctamente");
+  } else {
+    const { error } = await supabase
+      .from("postulaciones")
+      .insert([{ datos: respuestas }]);
+
+    if(error){
+      alert("❌ Error al enviar");
+      console.error(error);
+    } else {
+      alert("✅ Postulación enviada correctamente");
+      location.reload();
+    }
   }
 };
 
 /* ADMIN */
-window.adminLogin=async()=>{
-  const pass=prompt("Contraseña admin");
-  if(pass!=="1.21 #3 parcelas")return;
-  document.getElementById("adminPanel").style.display="block";
+window.adminLogin = async () => {
+  const pass = prompt("Contraseña admin");
+  if(pass !== "1.21 #3 parcelas") return;
+
+  document.getElementById("adminPanel").style.display = "block";
   loadPosts();
 };
 
 async function loadPosts(){
-  const {data}=await supabase.from("postulaciones").select("*").order("id",{ascending:false});
-  const div=document.getElementById("posts");
-  div.innerHTML="";
+  const { data, error } = await supabase
+    .from("postulaciones")
+    .select("*")
+    .order("id",{ascending:false});
+
+  if(error){ console.error(error); return; }
+
+  const div = document.getElementById("posts");
+  div.innerHTML = "";
+
   data.forEach(p=>{
-    div.innerHTML+=`
+    div.innerHTML += `
     <div class="post">
-      ${Object.keys(p.datos).map(k=>`
-        <div class="section"><b>${k}</b>: ${p.datos[k]}</div>`).join("")}
+      ${Object.entries(p.datos).map(([k,v]) =>
+        `<div class="section"><b>${k}</b>: ${v}</div>`
+      ).join("")}
       <button class="delete" onclick="del(${p.id})">Eliminar</button>
     </div>`;
   });
 }
 
-window.del=async(id)=>{
-  if(confirm("¿Eliminar?")){
+window.del = async (id) => {
+  if(confirm("¿Eliminar postulación?")){
     await supabase.from("postulaciones").delete().eq("id",id);
     loadPosts();
   }
 };
 
-window.closeAdmin=()=>document.getElementById("adminPanel").style.display="none";
+window.closeAdmin = () =>
+  document.getElementById("adminPanel").style.display="none";
 </script>
 
 </body>
 </html>
+
+
