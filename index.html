@@ -64,101 +64,90 @@ button{
   font-weight:bold;
   cursor:pointer
 }
+
+/* BOTÓN ADMIN */
+.admin-btn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:auto;
+  padding:12px 16px;
+  background:#5865f2;
+  z-index:100;
+}
+
+/* PANEL ADMIN */
+.admin-panel{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0b0d10;
+  z-index:200;
+  overflow-y:auto;
+}
+
+.post{
+  background:#111;
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.delete{
+  background:#f04747;
+  margin-top:10px
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<!-- BOTÓN ADMIN -->
+<button class="admin-btn" onclick="abrirAdmin()">🛠 Admin</button>
+
+<div class="container" id="formulario">
 <h1>Postulaciones The Blaze Java</h1>
 
 <div class="card">
 <div class="icon">📄</div>
 <h2>Rango SOPORTE</h2>
 <p>Completa todas las preguntas correctamente.</p>
-
 <div class="alert">🟢 Postulaciones ABIERTAS</div>
 
-<label>¿Tienes conocimientos en la ID? Si es así, envíanos tu ID</label>
-<textarea id="id_conocimiento"></textarea>
-
-<label>¿Qué sanciones tienes o has tenido en Minecraft?</label>
-<textarea id="sanciones"></textarea>
-
-<label>¿Qué sanciones tienes en Discord de TheBlaze?</label>
-<textarea id="sanciones_dc"></textarea>
-
-<label>¿Cuál es tu Nick de Minecraft?</label>
-<input id="nick_mc">
-
-<label>¿Eres activo en Minecraft?</label>
-<select id="activo_mc">
-<option>Si</option>
-<option>No</option>
-</select>
-
-<label>¿Cuánto tiempo llevas jugando Minecraft?</label>
-<input id="tiempo_mc">
-
-<label>¿Cuál es tu Nick de Discord?</label>
-<input id="discord">
-
-<label>¿Cuál es la diferencia entre Spam y Flood?</label>
-<textarea id="diferencia_spam"></textarea>
-
-<label>¿Qué es un Warn? Escríbelo con tus palabras</label>
-<textarea id="warn"></textarea>
-
-<label>¿Eres Premium?</label>
-<select id="premium">
-<option>Si</option>
-<option>No</option>
-</select>
-
-<label>¿Cuántos años tienes?</label>
-<select id="edad">
-<option>Menos de 12</option>
-<option>12</option>
-<option>Más de 12</option>
-</select>
-
-<label>Dime 10 bots que NO estén en TheBlaze</label>
-<textarea id="bots"></textarea>
-
-<label>¿Eres staff de otra network?</label>
-<select id="staff_otro">
-<option>Si</option>
-<option>No</option>
-</select>
-
-<label>¿Aceptas que todos los staff tengan el mismo rol?</label>
-<select id="acepta_staff">
-<option>Si</option>
-<option>No</option>
-</select>
-
-<label>¿Tienes experiencia como staff en otros servidores?</label>
-<textarea id="exp_staff"></textarea>
-
-<label>¿Tienes experiencia como programador o algo similar?</label>
-<textarea id="exp_programador"></textarea>
-
-<label>Si alguien hace algo ilegal en el servidor, ¿qué harías?</label>
-<textarea id="ilegal_servidor"></textarea>
-
-<label>Dime 10 comandos útiles para moderar en Discord</label>
-<textarea id="cmds_discord"></textarea>
-
-<label>Dime 10 comandos útiles para jugar Nautic</label>
-<textarea id="cmds_nautic"></textarea>
-
-<label>Si ves a tu amigo haciendo algo ilegal en Discord, ¿qué harías?</label>
-<textarea id="amigo_ilegal"></textarea>
-
-<label>¿Qué harías si te encuentras a un staff corrupto en TheBlaze?</label>
-<textarea id="staff_corrupto"></textarea>
+<textarea id="id_conocimiento" placeholder="¿Tienes conocimientos en la ID?"></textarea>
+<textarea id="sanciones" placeholder="Sanciones en Minecraft"></textarea>
+<textarea id="sanciones_dc" placeholder="Sanciones en Discord TheBlaze"></textarea>
+<input id="nick_mc" placeholder="Nick de Minecraft">
+<select id="activo_mc"><option>Si</option><option>No</option></select>
+<input id="tiempo_mc" placeholder="Tiempo jugando Minecraft">
+<input id="discord" placeholder="Nick de Discord">
+<textarea id="diferencia_spam" placeholder="Diferencia entre Spam y Flood"></textarea>
+<textarea id="warn" placeholder="¿Qué es un Warn?"></textarea>
+<select id="premium"><option>Si</option><option>No</option></select>
+<select id="edad"><option>Menos de 12</option><option>12</option><option>Más de 12</option></select>
+<textarea id="bots" placeholder="10 bots que no estén en TheBlaze"></textarea>
+<select id="staff_otro"><option>Si</option><option>No</option></select>
+<select id="acepta_staff"><option>Si</option><option>No</option></select>
+<textarea id="exp_staff" placeholder="Experiencia como staff"></textarea>
+<textarea id="exp_programador" placeholder="Experiencia como programador"></textarea>
+<textarea id="ilegal_servidor" placeholder="¿Qué harías ante algo ilegal?"></textarea>
+<textarea id="cmds_discord" placeholder="10 comandos útiles Discord"></textarea>
+<textarea id="cmds_nautic" placeholder="10 comandos Nautic"></textarea>
+<textarea id="amigo_ilegal" placeholder="Amigo haciendo algo ilegal"></textarea>
+<textarea id="staff_corrupto" placeholder="Staff corrupto"></textarea>
 
 <button onclick="enviar()">Enviar Postulación</button>
+</div>
+</div>
+
+<!-- PANEL ADMIN -->
+<div class="admin-panel" id="admin">
+<div class="container">
+<h1>Panel Admin</h1>
+<input type="password" id="pass" placeholder="Contraseña admin">
+<button onclick="loginAdmin()">Entrar</button>
+<div id="lista"></div>
+<button class="delete" onclick="cerrarAdmin()">Cerrar Panel</button>
 </div>
 </div>
 
@@ -171,49 +160,60 @@ const supabase = createClient(
 );
 
 window.enviar = async () => {
-  const datos = {
+  await supabase.from("postulaciones").insert([{
     rango:"soporte",
-    id_conocimiento: id_conocimiento.value,
-    sanciones: sanciones.value,
-    sanciones_dc: sanciones_dc.value,
-    nick_mc: nick_mc.value,
-    activo_mc: activo_mc.value,
-    tiempo_mc: tiempo_mc.value,
-    discord: discord.value,
-    diferencia_spam: diferencia_spam.value,
-    warn: warn.value,
-    premium: premium.value,
-    edad: edad.value,
-    bots: bots.value,
-    staff_otro: staff_otro.value,
-    acepta_staff: acepta_staff.value,
-    exp_staff: exp_staff.value,
-    exp_programador: exp_programador.value,
-    ilegal_servidor: ilegal_servidor.value,
-    cmds_discord: cmds_discord.value,
-    cmds_nautic: cmds_nautic.value,
-    amigo_ilegal: amigo_ilegal.value,
-    staff_corrupto: staff_corrupto.value
-  };
+    id_conocimiento:id_conocimiento.value,
+    sanciones:sanciones.value,
+    sanciones_dc:sanciones_dc.value,
+    nick_mc:nick_mc.value,
+    activo_mc:activo_mc.value,
+    tiempo_mc:tiempo_mc.value,
+    discord:discord.value,
+    diferencia_spam:diferencia_spam.value,
+    warn:warn.value,
+    premium:premium.value,
+    edad:edad.value,
+    bots:bots.value,
+    staff_otro:staff_otro.value,
+    acepta_staff:acepta_staff.value,
+    exp_staff:exp_staff.value,
+    exp_programador:exp_programador.value,
+    ilegal_servidor:ilegal_servidor.value,
+    cmds_discord:cmds_discord.value,
+    cmds_nautic:cmds_nautic.value,
+    amigo_ilegal:amigo_ilegal.value,
+    staff_corrupto:staff_corrupto.value
+  }]);
+  alert("✅ Postulación enviada");
+  location.reload();
+};
 
-  const { error } = await supabase.from("postulaciones").insert([datos]);
+window.abrirAdmin = ()=> document.getElementById("admin").style.display="block";
+window.cerrarAdmin = ()=> document.getElementById("admin").style.display="none";
 
-  if(error){
-    alert("❌ Error al enviar");
-    console.error(error);
-  }else{
-    alert("✅ Postulación enviada correctamente");
-    location.reload();
-  }
+window.loginAdmin = async ()=>{
+  if(pass.value!=="1.21 #3 parcelas") return alert("❌ Incorrecta");
+  const {data}=await supabase.from("postulaciones").select("*").order("created_at",{ascending:false});
+  lista.innerHTML="";
+  data.forEach(p=>{
+    lista.innerHTML+=`
+      <div class="post">
+      <b>${p.nick_mc}</b> | ${p.discord}<br>
+      <small>${new Date(p.created_at).toLocaleString()}</small>
+      <pre>${JSON.stringify(p,null,2)}</pre>
+      <button class="delete" onclick="borrar(${p.id})">Borrar</button>
+      </div>`;
+  });
+};
+
+window.borrar=async(id)=>{
+  await supabase.from("postulaciones").delete().eq("id",id);
+  loginAdmin();
 };
 </script>
 
 </body>
 </html>
-
-
-
-
 
 
 
