@@ -32,31 +32,23 @@ h1{text-align:center;margin-bottom:40px}
     display:flex;align-items:center;justify-content:center;
     margin-bottom:20px
 }
-.card h2{margin:0 0 10px}
-.card p{color:#9da1a9;font-size:14px}
-
 .alert{
     margin:20px 0;
     padding:12px;
     border-radius:10px;
     background:rgba(240,71,71,.15);
     color:#f04747;
-    display:flex;
-    gap:8px;
-    font-size:14px
 }
-
 button{
     padding:12px;
     border-radius:10px;
     border:none;
     font-weight:bold;
     cursor:pointer;
-    font-size:15px
 }
-.btn-open{background:linear-gradient(135deg,#43b581,#2ea043);color:white}
-.btn-closed{background:#2b2d31;color:#72767d;cursor:not-allowed}
-.admin{margin-top:10px;background:#5865f2;color:white}
+.btn-open{background:#2ea043;color:white}
+.btn-closed{background:#2b2d31;color:#777;cursor:not-allowed}
+.admin-btn{background:#5865f2;color:white;margin-top:10px}
 
 .modal{
     position:fixed;inset:0;
@@ -64,7 +56,6 @@ button{
     display:none;
     align-items:center;
     justify-content:center;
-    z-index:10
 }
 .modal-content{
     background:#1c1f26;
@@ -72,20 +63,18 @@ button{
     border-radius:16px;
     max-width:600px;
     width:90%;
-    max-height:80vh;
-    overflow-y:auto;
 }
-label{display:block;margin-top:15px;font-size:14px}
-input, textarea{
+input,textarea{
     width:100%;
     padding:10px;
-    margin-top:5px;
+    margin-top:8px;
     border-radius:8px;
     border:none;
     background:#2b2d31;
     color:white;
 }
-.modal button{margin-top:20px;width:100%;background:#5865f2;color:white}
+.admin-panel{display:none;margin-top:40px}
+.post-card{background:#111;padding:15px;border-radius:10px;margin:10px 0}
 </style>
 </head>
 
@@ -100,76 +89,117 @@ input, textarea{
 <div class="icon">📄</div>
 <h2>Rango SOPORTE</h2>
 <p>Postulación para formar parte del equipo de soporte.</p>
-<div class="alert" id="alert-soporte">🟢 Postulación ABIERTA</div>
+<div class="alert" id="estado">Cargando...</div>
 </div>
-<button class="btn-open" onclick="abrir()">Postularse</button>
-</div>
+<button id="btnPostular" class="btn-open" onclick="abrir()">Postularse</button>
 </div>
 </div>
 
+<!-- LOGIN ADMIN -->
+<h3>Panel Admin</h3>
+<input type="password" id="password" placeholder="Contraseña admin">
+<button class="admin-btn" onclick="login()">Entrar</button>
+
+<!-- PANEL ADMIN -->
+<div class="admin-panel" id="adminPanel">
+<h3>Control</h3>
+<button onclick="abrirPost()">Abrir postulaciones</button>
+<button onclick="cerrarPost()">Cerrar postulaciones</button>
+
+<h3>Postulaciones</h3>
+<div id="lista"></div>
+</div>
+</div>
+
+<!-- MODAL POSTULAR -->
 <div class="modal" id="modal">
 <div class="modal-content">
 <h3>Postulación - SOPORTE</h3>
-
-<label>Tu nombre de Discord:</label>
-<input id="discord">
-
-<label>¿Por qué quieres ser soporte?</label>
-<textarea id="motivo"></textarea>
-
-<label>¿Cuánto tiempo podrías dedicar?</label>
-<textarea id="tiempo"></textarea>
-
-<label>¿Tienes experiencia?</label>
-<textarea id="experiencia"></textarea>
-
-<button onclick="enviar()">Enviar Postulación</button>
+<input id="discord" placeholder="Discord">
+<textarea id="motivo" placeholder="Motivo"></textarea>
+<textarea id="tiempo" placeholder="Tiempo"></textarea>
+<textarea id="experiencia" placeholder="Experiencia"></textarea>
+<button onclick="enviar()">Enviar</button>
 </div>
 </div>
 
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const supabaseUrl = "https://bvbneelfosacutwhjzhx.supabase.co";
-const supabaseKey = "sb_publishable_8QluYXwqMPxYWszgJlCbzw_EdakwSl-";
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  "https://bvbneelfosacutwhjzhx.supabase.co",
+  "sb_publishable_8QluYXwqMPxYWszgJlCbzw_EdakwSl-"
+);
 
-window.abrir = () => {
-  document.getElementById("modal").style.display = "flex";
-};
+/* ===== ESTADO ===== */
+async function cargarEstado(){
+  const { data } = await supabase
+    .from("config")
+    .select("abiertas")
+    .eq("id",1)
+    .single();
+
+  const abierta = data.abiertas;
+  estado.innerText = abierta ? "🟢 ABIERTA" : "🔴 CERRADA";
+  btnPostular.disabled = !abierta;
+  btnPostular.className = abierta ? "btn-open" : "btn-closed";
+}
+cargarEstado();
+
+/* ===== POSTULAR ===== */
+window.abrir = () => modal.style.display = "flex";
 
 window.enviar = async () => {
-  const discord = document.getElementById("discord").value.trim();
-  const motivo = document.getElementById("motivo").value.trim();
-  const tiempo = document.getElementById("tiempo").value.trim();
-  const experiencia = document.getElementById("experiencia").value.trim();
-
-  if (!discord) {
-    alert("Debes poner tu Discord");
-    return;
-  }
-
-  const { error } = await supabase.from("postulaciones").insert([{
-    rango: "soporte",
-    discord,
-    motivo,
-    tiempo,
-    experiencia
+  await supabase.from("postulaciones").insert([{
+    rango:"soporte",
+    discord:discord.value,
+    motivo:motivo.value,
+    tiempo:tiempo.value,
+    experiencia:experiencia.value
   }]);
+  alert("Postulación enviada");
+  modal.style.display = "none";
+};
 
-  if (error) {
-    alert("❌ Error al enviar");
-    console.error(error);
-  } else {
-    alert("✅ Postulación enviada y guardada");
-    document.getElementById("modal").style.display = "none";
-  }
+/* ===== ADMIN ===== */
+window.login = () => {
+  if(password.value === "1.21 #3 parcelas"){
+    adminPanel.style.display = "block";
+    cargarPostulaciones();
+  } else alert("Contraseña incorrecta");
+};
+
+async function cargarPostulaciones(){
+  const { data } = await supabase.from("postulaciones").select("*");
+  lista.innerHTML="";
+  data.forEach(p=>{
+    lista.innerHTML+=`
+    <div class="post-card">
+      <b>${p.discord}</b><br>
+      ${p.motivo}<br>
+      <button onclick="borrar(${p.id})">Borrar</button>
+    </div>`;
+  });
+}
+
+window.borrar = async (id) => {
+  await supabase.from("postulaciones").delete().eq("id",id);
+  cargarPostulaciones();
+};
+
+window.abrirPost = async () => {
+  await supabase.from("config").update({abiertas:true}).eq("id",1);
+  cargarEstado();
+};
+
+window.cerrarPost = async () => {
+  await supabase.from("config").update({abiertas:false}).eq("id",1);
+  cargarEstado();
 };
 </script>
 
 </body>
 </html>
-
 
 
 
