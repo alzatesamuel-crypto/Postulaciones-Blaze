@@ -8,159 +8,135 @@
 <style>
 body{
   margin:0;
-  font-family:Arial,sans-serif;
+  font-family:Arial, sans-serif;
   background:radial-gradient(circle at top,#111,#000);
   color:#e4e6eb;
 }
-.container{max-width:1200px;margin:auto;padding:40px 20px}
-h1{text-align:center;margin-bottom:40px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:25px}
+.container{max-width:900px;margin:auto;padding:40px 20px}
+h1{text-align:center;margin-bottom:10px}
+p{text-align:center;color:#9da1a9}
 
-.card{
+form{
   background:#0f1115;
   border-radius:16px;
-  padding:25px;
-  box-shadow:0 0 40px rgba(0,0,0,.8);
-}
-.icon{
-  width:50px;height:50px;
-  background:#7c6a00;
-  border-radius:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin-bottom:20px
-}
-.alert{
-  margin:15px 0;
-  padding:10px;
-  border-radius:10px;
-  background:rgba(240,71,71,.15);
-  color:#f04747;
-}
-button{
-  padding:12px;
-  border-radius:10px;
-  border:none;
-  font-weight:bold;
-  cursor:pointer;
-}
-.btn-open{background:#2ea043;color:white}
-.btn-closed{background:#2b2d31;color:#777;cursor:not-allowed}
-
-#btnAdmin{
-  position:fixed;
-  top:15px;
-  right:15px;
-  background:#5865f2;
-  color:white;
-  padding:10px 14px;
-  border-radius:10px;
-  z-index:50;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.8);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:20;
-}
-.modal-content{
-  background:#1c1f26;
   padding:30px;
-  border-radius:16px;
-  max-width:600px;
-  width:90%;
-  max-height:80vh;
-  overflow-y:auto;
+  box-shadow:0 0 40px rgba(0,0,0,.8)
 }
-input,textarea{
+
+label{display:block;margin-top:18px;font-size:14px}
+input, textarea, select{
   width:100%;
   padding:10px;
-  margin-top:10px;
+  margin-top:6px;
   border-radius:8px;
   border:none;
   background:#2b2d31;
   color:white;
 }
-.admin-panel{display:none;margin-top:40px}
-.post-card{
-  background:#111;
-  padding:15px;
+textarea{min-height:80px}
+
+button{
+  margin-top:30px;
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border:none;
   border-radius:10px;
-  margin:10px 0;
+  background:linear-gradient(135deg,#43b581,#2ea043);
+  color:white;
+  font-weight:bold;
+  cursor:pointer
 }
 </style>
 </head>
 
 <body>
 
-<button id="btnAdmin" onclick="mostrarLogin()">⚙ Admin</button>
-
 <div class="container">
-<h1>Postulaciones The Blaze Java</h1>
+<h1>Postulación STAFF - The Blaze</h1>
+<p>Completa todas las preguntas correctamente</p>
 
-<div class="cards">
-<div class="card">
-<div class="icon">📄</div>
-<h2>Rango SOPORTE</h2>
-<p>Postulación para formar parte del equipo de soporte.</p>
-<div class="alert" id="estado">Cargando...</div>
-<button id="btnPostular" class="btn-open" onclick="abrir()">Postularse</button>
-</div>
-</div>
+<form onsubmit="enviar(event)">
 
-<!-- PANEL ADMIN -->
-<div class="admin-panel" id="adminPanel">
-<h2>Panel de Administración</h2>
-<button onclick="abrirPost()">Abrir postulaciones</button>
-<button onclick="cerrarPost()">Cerrar postulaciones</button>
+<label>Nick de Discord *</label>
+<input id="discord" required>
 
-<h3>Postulaciones recibidas</h3>
-<div id="lista"></div>
-</div>
-</div>
+<label>¿Tienes conocimientos en la ID? Si es así, escríbela *</label>
+<textarea id="id_conocimiento" required></textarea>
 
-<!-- MODAL POSTULAR -->
-<div class="modal" id="modal">
-<div class="modal-content">
-<h3>Postulación - SOPORTE</h3>
+<label>¿Qué sanciones tienes o has tenido en Minecraft? *</label>
+<textarea id="sanciones" required></textarea>
 
-<input id="discord" placeholder="Tu usuario de Discord (incluye # y números)">
+<label>¿Qué sanciones tienes en Discord de TheBlaze? *</label>
+<textarea id="sanciones_dc" required></textarea>
 
-<textarea id="motivo" placeholder="¿Por qué quieres formar parte del equipo de soporte de The Blaze Java?
-Explica tus razones y qué aportarías al servidor."></textarea>
+<label>Nick de Minecraft *</label>
+<input id="nick_mc" required>
 
-<textarea id="tiempo" placeholder="¿Cuánto tiempo puedes dedicar al servidor?
-Indica horas aproximadas por día y días de la semana."></textarea>
+<label>¿Eres activo en Minecraft? *</label>
+<select id="activo_mc" required>
+  <option value="">Selecciona</option>
+  <option>Si</option>
+  <option>No</option>
+</select>
 
-<textarea id="experiencia" placeholder="¿Tienes experiencia como staff o moderador?
-Menciona servidores, rangos anteriores o situaciones que hayas manejado.
-(Si no tienes experiencia, explícalo igualmente)"></textarea>
+<label>¿Cuánto tiempo llevas jugando Minecraft? *</label>
+<input id="tiempo_mc" required>
 
-<button onclick="enviar()">Enviar postulación</button>
-</div>
-</div>
+<label>Diferencia entre Spam y Flood *</label>
+<textarea id="diferencia_spam" required></textarea>
 
-<!-- LOGIN ADMIN -->
-<div class="modal" id="loginModal">
-<div class="modal-content">
-<h3>Acceso Admin</h3>
-<input type="password" id="password" placeholder="Contraseña">
-<button onclick="login()">Entrar</button>
-</div>
-</div>
+<label>¿Qué es un Warn? Escríbelo con tus palabras *</label>
+<textarea id="warn" required></textarea>
 
-<!-- VER POSTULACIÓN -->
-<div class="modal" id="verModal">
-<div class="modal-content">
-<h3>Postulación completa</h3>
-<div id="detallePost"></div>
-<button onclick="verModal.style.display='none'">Cerrar</button>
-</div>
+<label>¿Eres Premium? *</label>
+<select id="premium" required>
+  <option value="">Selecciona</option>
+  <option>Si</option>
+  <option>No</option>
+</select>
+
+<label>¿Cuántos años tienes? *</label>
+<select id="edad" required>
+  <option value="">Selecciona</option>
+  <option>Menos de 12</option>
+  <option>12</option>
+  <option>Más de 12</option>
+</select>
+
+<label>Dime 10 bots que NO estén en TheBlaze *</label>
+<textarea id="bots" required></textarea>
+
+<label>¿Eres staff de otra network? *</label>
+<textarea id="staff_otro" required></textarea>
+
+<label>¿Aceptas que todos los staff tengan jerarquía y respeto? *</label>
+<textarea id="acepta_staff" required></textarea>
+
+<label>¿Tienes experiencia como staff en otros servidores? *</label>
+<textarea id="exp_staff" required></textarea>
+
+<label>¿Tienes experiencia como programador u otra área técnica? *</label>
+<textarea id="exp_programador" required></textarea>
+
+<label>Si alguien hace algo ilegal en el servidor, ¿qué harías? *</label>
+<textarea id="ilegal_servidor" required></textarea>
+
+<label>Dime 10 comandos útiles para moderar en Discord *</label>
+<textarea id="cmds_discord" required></textarea>
+
+<label>Dime 10 comandos útiles para jugar Nautic *</label>
+<textarea id="cmds_nautic" required></textarea>
+
+<label>Si ves a tu amigo haciendo algo ilegal en Discord, ¿qué harías? *</label>
+<textarea id="amigo_ilegal" required></textarea>
+
+<label>¿Qué harías si te encuentras a un staff corrupto en TheBlaze? *</label>
+<textarea id="staff_corrupto" required></textarea>
+
+<button type="submit">Enviar Postulación</button>
+
+</form>
 </div>
 
 <script type="module">
@@ -171,91 +147,43 @@ const supabase = createClient(
   "sb_publishable_8QluYXwqMPxYWszgJlCbzw_EdakwSl-"
 );
 
-/* ESTADO POSTULACIONES */
-async function cargarEstado(){
-  const { data } = await supabase
-    .from("config")
-    .select("abiertas")
-    .eq("id",1)
-    .single();
+window.enviar = async (e) => {
+  e.preventDefault();
 
-  const abierta = data.abiertas;
-  estado.innerText = abierta ? "🟢 POSTULACIONES ABIERTAS" : "🔴 POSTULACIONES CERRADAS";
-  btnPostular.disabled = !abierta;
-  btnPostular.className = abierta ? "btn-open" : "btn-closed";
-}
-cargarEstado();
+  const datos = {
+    rango: "soporte",
+    discord: discord.value,
+    id_conocimiento: id_conocimiento.value,
+    sanciones: sanciones.value,
+    sanciones_dc: sanciones_dc.value,
+    nick_mc: nick_mc.value,
+    activo_mc: activo_mc.value,
+    tiempo_mc: tiempo_mc.value,
+    diferencia_spam: diferencia_spam.value,
+    warn: warn.value,
+    premium: premium.value,
+    edad: edad.value,
+    bots: bots.value,
+    staff_otro: staff_otro.value,
+    acepta_staff: acepta_staff.value,
+    exp_staff: exp_staff.value,
+    exp_programador: exp_programador.value,
+    ilegal_servidor: ilegal_servidor.value,
+    cmds_discord: cmds_discord.value,
+    cmds_nautic: cmds_nautic.value,
+    amigo_ilegal: amigo_ilegal.value,
+    staff_corrupto: staff_corrupto.value
+  };
 
-/* POSTULAR */
-window.abrir = () => modal.style.display="flex";
+  const { error } = await supabase.from("postulaciones").insert([datos]);
 
-window.enviar = async () => {
-  if(!discord.value.trim()){
-    alert("Debes ingresar tu Discord");
-    return;
+  if(error){
+    alert("❌ Error al enviar");
+    console.error(error);
+  } else {
+    alert("✅ Postulación enviada correctamente");
+    document.querySelector("form").reset();
   }
-
-  await supabase.from("postulaciones").insert([{
-    rango:"soporte",
-    discord:discord.value,
-    motivo:motivo.value,
-    tiempo:tiempo.value,
-    experiencia:experiencia.value
-  }]);
-
-  alert("✅ Postulación enviada correctamente");
-  modal.style.display="none";
-};
-
-/* ADMIN */
-window.mostrarLogin = () => loginModal.style.display="flex";
-
-window.login = () => {
-  if(password.value==="1.21 #3 parcelas"){
-    loginModal.style.display="none";
-    adminPanel.style.display="block";
-    cargarPostulaciones();
-  }else{
-    alert("❌ Contraseña incorrecta");
-  }
-};
-
-async function cargarPostulaciones(){
-  const { data } = await supabase.from("postulaciones").select("*");
-  lista.innerHTML="";
-  data.forEach(p=>{
-    lista.innerHTML+=`
-    <div class="post-card">
-      <b>${p.discord}</b><br><br>
-      <button onclick='verPost(${JSON.stringify(p)})'>Ver completa</button>
-      <button onclick='borrar(${p.id})'>Borrar</button>
-    </div>`;
-  });
-}
-
-window.verPost = (p) => {
-  detallePost.innerHTML = `
-    <b>Discord:</b> ${p.discord}<br><br>
-    <b>Motivo:</b><br>${p.motivo}<br><br>
-    <b>Tiempo disponible:</b><br>${p.tiempo}<br><br>
-    <b>Experiencia:</b><br>${p.experiencia}
-  `;
-  verModal.style.display="flex";
-};
-
-window.borrar = async (id) => {
-  await supabase.from("postulaciones").delete().eq("id",id);
-  cargarPostulaciones();
-};
-
-window.abrirPost = async () => {
-  await supabase.from("config").update({abiertas:true}).eq("id",1);
-  cargarEstado();
-};
-
-window.cerrarPost = async () => {
-  await supabase.from("config").update({abiertas:false}).eq("id",1);
-  cargarEstado();
 };
 </script>
 
