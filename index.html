@@ -12,38 +12,55 @@ body{
   background:radial-gradient(circle at top,#111,#000);
   color:#e4e6eb;
 }
-.container{max-width:900px;margin:auto;padding:40px 20px}
-h1{text-align:center;margin-bottom:10px}
-p{text-align:center;color:#9da1a9}
+.container{max-width:1200px;margin:auto;padding:40px 20px}
+h1{text-align:center;margin-bottom:40px}
 
-form{
-  background:#0f1115;
+.card{
+  background:linear-gradient(180deg,#0f1115,#0a0b0e);
   border-radius:16px;
-  padding:30px;
-  box-shadow:0 0 40px rgba(0,0,0,.8)
+  padding:25px;
+  box-shadow:0 0 40px rgba(0,0,0,.8);
 }
 
-label{display:block;margin-top:18px;font-size:14px}
+.icon{
+  width:50px;height:50px;
+  background:#7c6a00;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:20px
+}
+
+.alert{
+  margin:20px 0;
+  padding:12px;
+  border-radius:10px;
+  background:rgba(67,181,129,.15);
+  color:#43b581;
+  font-size:14px
+}
+
+label{display:block;margin-top:15px;font-size:14px}
 input, textarea, select{
   width:100%;
   padding:10px;
-  margin-top:6px;
+  margin-top:5px;
   border-radius:8px;
   border:none;
   background:#2b2d31;
   color:white;
 }
-textarea{min-height:80px}
 
 button{
-  margin-top:30px;
+  margin-top:25px;
   width:100%;
   padding:14px;
-  font-size:16px;
   border:none;
   border-radius:10px;
   background:linear-gradient(135deg,#43b581,#2ea043);
   color:white;
+  font-size:16px;
   font-weight:bold;
   cursor:pointer
 }
@@ -53,90 +70,96 @@ button{
 <body>
 
 <div class="container">
-<h1>Postulación STAFF - The Blaze</h1>
-<p>Completa todas las preguntas correctamente</p>
+<h1>Postulaciones The Blaze Java</h1>
 
-<form onsubmit="enviar(event)">
+<div class="card">
+<div class="icon">📄</div>
+<h2>Rango SOPORTE</h2>
+<p>Completa todas las preguntas correctamente.</p>
 
-<label>Nick de Discord *</label>
-<input id="discord" required>
+<div class="alert">🟢 Postulaciones ABIERTAS</div>
 
-<label>¿Tienes conocimientos en la ID? Si es así, escríbela *</label>
-<textarea id="id_conocimiento" required></textarea>
+<label>¿Tienes conocimientos en la ID? Si es así, envíanos tu ID</label>
+<textarea id="id_conocimiento"></textarea>
 
-<label>¿Qué sanciones tienes o has tenido en Minecraft? *</label>
-<textarea id="sanciones" required></textarea>
+<label>¿Qué sanciones tienes o has tenido en Minecraft?</label>
+<textarea id="sanciones"></textarea>
 
-<label>¿Qué sanciones tienes en Discord de TheBlaze? *</label>
-<textarea id="sanciones_dc" required></textarea>
+<label>¿Qué sanciones tienes en Discord de TheBlaze?</label>
+<textarea id="sanciones_dc"></textarea>
 
-<label>Nick de Minecraft *</label>
-<input id="nick_mc" required>
+<label>¿Cuál es tu Nick de Minecraft?</label>
+<input id="nick_mc">
 
-<label>¿Eres activo en Minecraft? *</label>
-<select id="activo_mc" required>
-  <option value="">Selecciona</option>
-  <option>Si</option>
-  <option>No</option>
+<label>¿Eres activo en Minecraft?</label>
+<select id="activo_mc">
+<option>Si</option>
+<option>No</option>
 </select>
 
-<label>¿Cuánto tiempo llevas jugando Minecraft? *</label>
-<input id="tiempo_mc" required>
+<label>¿Cuánto tiempo llevas jugando Minecraft?</label>
+<input id="tiempo_mc">
 
-<label>Diferencia entre Spam y Flood *</label>
-<textarea id="diferencia_spam" required></textarea>
+<label>¿Cuál es tu Nick de Discord?</label>
+<input id="discord">
 
-<label>¿Qué es un Warn? Escríbelo con tus palabras *</label>
-<textarea id="warn" required></textarea>
+<label>¿Cuál es la diferencia entre Spam y Flood?</label>
+<textarea id="diferencia_spam"></textarea>
 
-<label>¿Eres Premium? *</label>
-<select id="premium" required>
-  <option value="">Selecciona</option>
-  <option>Si</option>
-  <option>No</option>
+<label>¿Qué es un Warn? Escríbelo con tus palabras</label>
+<textarea id="warn"></textarea>
+
+<label>¿Eres Premium?</label>
+<select id="premium">
+<option>Si</option>
+<option>No</option>
 </select>
 
-<label>¿Cuántos años tienes? *</label>
-<select id="edad" required>
-  <option value="">Selecciona</option>
-  <option>Menos de 12</option>
-  <option>12</option>
-  <option>Más de 12</option>
+<label>¿Cuántos años tienes?</label>
+<select id="edad">
+<option>Menos de 12</option>
+<option>12</option>
+<option>Más de 12</option>
 </select>
 
-<label>Dime 10 bots que NO estén en TheBlaze *</label>
-<textarea id="bots" required></textarea>
+<label>Dime 10 bots que NO estén en TheBlaze</label>
+<textarea id="bots"></textarea>
 
-<label>¿Eres staff de otra network? *</label>
-<textarea id="staff_otro" required></textarea>
+<label>¿Eres staff de otra network?</label>
+<select id="staff_otro">
+<option>Si</option>
+<option>No</option>
+</select>
 
-<label>¿Aceptas que todos los staff tengan jerarquía y respeto? *</label>
-<textarea id="acepta_staff" required></textarea>
+<label>¿Aceptas que todos los staff tengan el mismo rol?</label>
+<select id="acepta_staff">
+<option>Si</option>
+<option>No</option>
+</select>
 
-<label>¿Tienes experiencia como staff en otros servidores? *</label>
-<textarea id="exp_staff" required></textarea>
+<label>¿Tienes experiencia como staff en otros servidores?</label>
+<textarea id="exp_staff"></textarea>
 
-<label>¿Tienes experiencia como programador u otra área técnica? *</label>
-<textarea id="exp_programador" required></textarea>
+<label>¿Tienes experiencia como programador o algo similar?</label>
+<textarea id="exp_programador"></textarea>
 
-<label>Si alguien hace algo ilegal en el servidor, ¿qué harías? *</label>
-<textarea id="ilegal_servidor" required></textarea>
+<label>Si alguien hace algo ilegal en el servidor, ¿qué harías?</label>
+<textarea id="ilegal_servidor"></textarea>
 
-<label>Dime 10 comandos útiles para moderar en Discord *</label>
-<textarea id="cmds_discord" required></textarea>
+<label>Dime 10 comandos útiles para moderar en Discord</label>
+<textarea id="cmds_discord"></textarea>
 
-<label>Dime 10 comandos útiles para jugar Nautic *</label>
-<textarea id="cmds_nautic" required></textarea>
+<label>Dime 10 comandos útiles para jugar Nautic</label>
+<textarea id="cmds_nautic"></textarea>
 
-<label>Si ves a tu amigo haciendo algo ilegal en Discord, ¿qué harías? *</label>
-<textarea id="amigo_ilegal" required></textarea>
+<label>Si ves a tu amigo haciendo algo ilegal en Discord, ¿qué harías?</label>
+<textarea id="amigo_ilegal"></textarea>
 
-<label>¿Qué harías si te encuentras a un staff corrupto en TheBlaze? *</label>
-<textarea id="staff_corrupto" required></textarea>
+<label>¿Qué harías si te encuentras a un staff corrupto en TheBlaze?</label>
+<textarea id="staff_corrupto"></textarea>
 
-<button type="submit">Enviar Postulación</button>
-
-</form>
+<button onclick="enviar()">Enviar Postulación</button>
+</div>
 </div>
 
 <script type="module">
@@ -147,18 +170,16 @@ const supabase = createClient(
   "sb_publishable_8QluYXwqMPxYWszgJlCbzw_EdakwSl-"
 );
 
-window.enviar = async (e) => {
-  e.preventDefault();
-
+window.enviar = async () => {
   const datos = {
-    rango: "soporte",
-    discord: discord.value,
+    rango:"soporte",
     id_conocimiento: id_conocimiento.value,
     sanciones: sanciones.value,
     sanciones_dc: sanciones_dc.value,
     nick_mc: nick_mc.value,
     activo_mc: activo_mc.value,
     tiempo_mc: tiempo_mc.value,
+    discord: discord.value,
     diferencia_spam: diferencia_spam.value,
     warn: warn.value,
     premium: premium.value,
@@ -180,15 +201,16 @@ window.enviar = async (e) => {
   if(error){
     alert("❌ Error al enviar");
     console.error(error);
-  } else {
+  }else{
     alert("✅ Postulación enviada correctamente");
-    document.querySelector("form").reset();
+    location.reload();
   }
 };
 </script>
 
 </body>
 </html>
+
 
 
 
