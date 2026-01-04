@@ -12,41 +12,52 @@ body{
   background:radial-gradient(circle at top,#111,#000);
   color:#e4e6eb;
 }
-.container{
-  max-width:800px;
-  margin:auto;
-  padding:40px 20px
-}
+.container{max-width:1200px;margin:auto;padding:40px 20px}
+h1{text-align:center;margin-bottom:40px}
+
 .card{
   background:linear-gradient(180deg,#0f1115,#0a0b0e);
   border-radius:16px;
-  padding:30px;
+  padding:25px;
   box-shadow:0 0 40px rgba(0,0,0,.8);
 }
-h1{text-align:center}
-.question{
-  margin-top:30px;
+
+.icon{
+  width:50px;height:50px;
+  background:#7c6a00;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:20px
 }
-label{
-  font-size:16px;
-  display:block;
-  margin-bottom:10px
-}
-input, textarea, select{
-  width:100%;
+
+.alert{
+  margin:20px 0;
   padding:12px;
   border-radius:10px;
+  background:rgba(67,181,129,.15);
+  color:#43b581;
+  font-size:14px
+}
+
+label{display:block;margin-top:15px;font-size:14px}
+input, textarea, select{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border-radius:8px;
   border:none;
   background:#2b2d31;
   color:white;
-  font-size:15px
 }
+
 button{
-  margin-top:30px;
+  margin-top:25px;
   width:100%;
   padding:14px;
   border:none;
-  border-radius:12px;
+  border-radius:10px;
   background:linear-gradient(135deg,#43b581,#2ea043);
   color:white;
   font-size:16px;
@@ -54,16 +65,18 @@ button{
   cursor:pointer
 }
 
-/* ADMIN */
+/* BOTÓN ADMIN */
 .admin-btn{
   position:fixed;
   bottom:20px;
   right:20px;
-  background:#5865f2;
+  width:auto;
   padding:12px 16px;
-  border-radius:10px;
-  z-index:100
+  background:#5865f2;
+  z-index:100;
 }
+
+/* PANEL ADMIN */
 .admin-panel{
   display:none;
   position:fixed;
@@ -72,12 +85,14 @@ button{
   z-index:200;
   overflow-y:auto;
 }
+
 .post{
   background:#111;
+  border-radius:14px;
   padding:20px;
-  border-radius:12px;
-  margin-bottom:20px
+  margin-bottom:20px;
 }
+
 .delete{
   background:#f04747;
   margin-top:10px
@@ -87,19 +102,41 @@ button{
 
 <body>
 
+<!-- BOTÓN ADMIN -->
 <button class="admin-btn" onclick="abrirAdmin()">🛠 Admin</button>
 
-<div class="container">
-<h1>Postulación | Soporte</h1>
+<div class="container" id="formulario">
+<h1>Postulaciones The Blaze Java</h1>
 
 <div class="card">
-  <div id="form">
-    <div class="question">
-      <label id="pregunta"></label>
-      <div id="input"></div>
-    </div>
-    <button onclick="siguiente()" id="btn">Siguiente</button>
-  </div>
+<div class="icon">📄</div>
+<h2>Rango SOPORTE</h2>
+<p>Completa todas las preguntas correctamente.</p>
+<div class="alert">🟢 Postulaciones ABIERTAS</div>
+
+<textarea id="id_conocimiento" placeholder="¿Tienes conocimientos en la ID?"></textarea>
+<textarea id="sanciones" placeholder="Sanciones en Minecraft"></textarea>
+<textarea id="sanciones_dc" placeholder="Sanciones en Discord TheBlaze"></textarea>
+<input id="nick_mc" placeholder="Nick de Minecraft">
+<select id="activo_mc"><option>Si</option><option>No</option></select>
+<input id="tiempo_mc" placeholder="Tiempo jugando Minecraft">
+<input id="discord" placeholder="Nick de Discord">
+<textarea id="diferencia_spam" placeholder="Diferencia entre Spam y Flood"></textarea>
+<textarea id="warn" placeholder="¿Qué es un Warn?"></textarea>
+<select id="premium"><option>Si</option><option>No</option></select>
+<select id="edad"><option>Menos de 12</option><option>12</option><option>Más de 12</option></select>
+<textarea id="bots" placeholder="10 bots que no estén en TheBlaze"></textarea>
+<select id="staff_otro"><option>Si</option><option>No</option></select>
+<select id="acepta_staff"><option>Si</option><option>No</option></select>
+<textarea id="exp_staff" placeholder="Experiencia como staff"></textarea>
+<textarea id="exp_programador" placeholder="Experiencia como programador"></textarea>
+<textarea id="ilegal_servidor" placeholder="¿Qué harías ante algo ilegal?"></textarea>
+<textarea id="cmds_discord" placeholder="10 comandos útiles Discord"></textarea>
+<textarea id="cmds_nautic" placeholder="10 comandos Nautic"></textarea>
+<textarea id="amigo_ilegal" placeholder="Amigo haciendo algo ilegal"></textarea>
+<textarea id="staff_corrupto" placeholder="Staff corrupto"></textarea>
+
+<button onclick="enviar()">Enviar Postulación</button>
 </div>
 </div>
 
@@ -107,10 +144,10 @@ button{
 <div class="admin-panel" id="admin">
 <div class="container">
 <h1>Panel Admin</h1>
-<input id="pass" type="password" placeholder="Contraseña admin">
+<input type="password" id="pass" placeholder="Contraseña admin">
 <button onclick="loginAdmin()">Entrar</button>
 <div id="lista"></div>
-<button class="delete" onclick="cerrarAdmin()">Cerrar panel</button>
+<button class="delete" onclick="cerrarAdmin()">Cerrar Panel</button>
 </div>
 </div>
 
@@ -122,93 +159,56 @@ const supabase = createClient(
   "sb_publishable_8QluYXwqMPxYWszgJlCbzw_EdakwSl-"
 );
 
-const preguntas = [
- {k:"id_conocimiento", t:"¿Tienes conocimientos en la ID? Si es así envíanos tu ID", type:"textarea"},
- {k:"sanciones", t:"¿Qué sanciones tienes o has tenido en Minecraft?", type:"textarea"},
- {k:"sanciones_dc", t:"¿Qué sanciones tienes en Discord de TheBlaze?", type:"textarea"},
- {k:"nick_mc", t:"¿Cuál es tu Nick de Minecraft?", type:"input"},
- {k:"activo_mc", t:"¿Eres activo en Minecraft?", type:"select", o:["Si","No"]},
- {k:"tiempo_mc", t:"¿Cuánto tiempo llevas jugando Minecraft?", type:"input"},
- {k:"discord", t:"¿Cuál es tu Nick de Discord?", type:"input"},
- {k:"diferencia_spam", t:"¿Cuál es la diferencia entre Spam y Flood?", type:"textarea"},
- {k:"warn", t:"¿Qué es un Warn? Escríbelo con tus palabras", type:"textarea"},
- {k:"premium", t:"¿Eres Premium?", type:"select", o:["Si","No"]},
- {k:"edad", t:"¿Cuántos años tienes?", type:"select", o:["Menos de 12","12","Más de 12"]},
- {k:"bots", t:"Dime 10 bots que NO estén en TheBlaze", type:"textarea"},
- {k:"staff_otro", t:"¿Eres staff de otra network?", type:"select", o:["Si","No"]},
- {k:"acepta_staff", t:"¿Aceptas que todos los staff tengan el mismo rol?", type:"select", o:["Si","No"]},
- {k:"exp_staff", t:"¿Tienes experiencia como staff?", type:"textarea"},
- {k:"exp_programador", t:"¿Tienes experiencia como programador?", type:"textarea"},
- {k:"ilegal_servidor", t:"Si alguien hace algo ilegal en el servidor, ¿qué harías?", type:"textarea"},
- {k:"cmds_discord", t:"Dime 10 comandos útiles para moderar en Discord", type:"textarea"},
- {k:"cmds_nautic", t:"Dime 10 comandos útiles para jugar Nautic", type:"textarea"},
- {k:"amigo_ilegal", t:"Si tu amigo hace algo ilegal en Discord, ¿qué harías?", type:"textarea"},
- {k:"staff_corrupto", t:"¿Qué harías si encuentras un staff corrupto en TheBlaze?", type:"textarea"}
-];
-
-let i = 0;
-const respuestas = {};
-
-const pregunta = document.getElementById("pregunta");
-const inputDiv = document.getElementById("input");
-const btn = document.getElementById("btn");
-
-function render(){
-  const p = preguntas[i];
-  pregunta.innerText = p.t;
-  inputDiv.innerHTML = "";
-
-  let el;
-  if(p.type==="textarea"){
-    el=document.createElement("textarea");
-  }else if(p.type==="select"){
-    el=document.createElement("select");
-    p.o.forEach(v=>{
-      const op=document.createElement("option");
-      op.text=v; el.add(op);
-    });
-  }else{
-    el=document.createElement("input");
-  }
-  el.id="respuesta";
-  inputDiv.appendChild(el);
-
-  btn.innerText = i === preguntas.length-1 ? "Enviar Postulación" : "Siguiente";
-}
-
-window.siguiente = async ()=>{
-  const val = document.getElementById("respuesta").value;
-  if(!val) return alert("Responde la pregunta");
-  respuestas[preguntas[i].k]=val;
-
-  if(i === preguntas.length-1){
-    await supabase.from("postulaciones").insert([respuestas]);
-    alert("✅ Postulación enviada correctamente");
-    location.reload();
-  }else{
-    i++; render();
-  }
+window.enviar = async () => {
+  await supabase.from("postulaciones").insert([{
+    rango:"soporte",
+    id_conocimiento:id_conocimiento.value,
+    sanciones:sanciones.value,
+    sanciones_dc:sanciones_dc.value,
+    nick_mc:nick_mc.value,
+    activo_mc:activo_mc.value,
+    tiempo_mc:tiempo_mc.value,
+    discord:discord.value,
+    diferencia_spam:diferencia_spam.value,
+    warn:warn.value,
+    premium:premium.value,
+    edad:edad.value,
+    bots:bots.value,
+    staff_otro:staff_otro.value,
+    acepta_staff:acepta_staff.value,
+    exp_staff:exp_staff.value,
+    exp_programador:exp_programador.value,
+    ilegal_servidor:ilegal_servidor.value,
+    cmds_discord:cmds_discord.value,
+    cmds_nautic:cmds_nautic.value,
+    amigo_ilegal:amigo_ilegal.value,
+    staff_corrupto:staff_corrupto.value
+  }]);
+  alert("✅ Postulación enviada");
+  location.reload();
 };
 
-render();
+window.abrirAdmin = ()=> document.getElementById("admin").style.display="block";
+window.cerrarAdmin = ()=> document.getElementById("admin").style.display="none";
 
-/* ADMIN */
-window.abrirAdmin=()=>admin.style.display="block";
-window.cerrarAdmin=()=>admin.style.display="none";
-
-window.loginAdmin=async()=>{
- if(pass.value!=="1.21 #3 parcelas") return alert("❌ Incorrecta");
- const {data}=await supabase.from("postulaciones").select("*").order("created_at",{ascending:false});
- lista.innerHTML="";
- data.forEach(p=>{
-   lista.innerHTML+=`<div class="post"><pre>${JSON.stringify(p,null,2)}</pre>
-   <button class="delete" onclick="borrar(${p.id})">Borrar</button></div>`;
- });
+window.loginAdmin = async ()=>{
+  if(pass.value!=="1.21 #3 parcelas") return alert("❌ Incorrecta");
+  const {data}=await supabase.from("postulaciones").select("*").order("created_at",{ascending:false});
+  lista.innerHTML="";
+  data.forEach(p=>{
+    lista.innerHTML+=`
+      <div class="post">
+      <b>${p.nick_mc}</b> | ${p.discord}<br>
+      <small>${new Date(p.created_at).toLocaleString()}</small>
+      <pre>${JSON.stringify(p,null,2)}</pre>
+      <button class="delete" onclick="borrar(${p.id})">Borrar</button>
+      </div>`;
+  });
 };
 
 window.borrar=async(id)=>{
- await supabase.from("postulaciones").delete().eq("id",id);
- loginAdmin();
+  await supabase.from("postulaciones").delete().eq("id",id);
+  loginAdmin();
 };
 </script>
 
