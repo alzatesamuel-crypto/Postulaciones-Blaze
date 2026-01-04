@@ -100,18 +100,13 @@ input, textarea{
 <div class="icon">📄</div>
 <h2>Rango SOPORTE</h2>
 <p>Postulación para formar parte del equipo de soporte.</p>
-<div class="alert" id="alert-soporte">Cargando estado...</div>
+<div class="alert" id="alert-soporte">🟢 Postulación ABIERTA</div>
 </div>
-
-<button id="btn-postular" class="btn-open" onclick="abrir()">Postularse</button>
-<button class="admin" onclick="togglePostulaciones()">Abrir / Cerrar postulaciones</button>
-<button class="admin" onclick="verPostulaciones()">Ver postulaciones</button>
-
+<button class="btn-open" onclick="abrir()">Postularse</button>
 </div>
 </div>
 </div>
 
-<!-- MODAL POSTULAR -->
 <div class="modal" id="modal">
 <div class="modal-content">
 <h3>Postulación - SOPORTE</h3>
@@ -132,15 +127,6 @@ input, textarea{
 </div>
 </div>
 
-<!-- MODAL VER POSTULACIONES -->
-<div class="modal" id="modal-postulaciones">
-<div class="modal-content">
-<h3>Postulaciones - SOPORTE</h3>
-<div id="lista-postulaciones"></div>
-<button onclick="cerrarPostulaciones()">Cerrar</button>
-</div>
-</div>
-
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -148,12 +134,10 @@ const supabaseUrl = "https://bvbneelfosacutwhjzhx.supabase.co";
 const supabaseKey = "sb_publishable_8QluYXwqMPxYWszgJlCbzw_EdakwSl-";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// ---------- MODAL POSTULAR ----------
 window.abrir = () => {
   document.getElementById("modal").style.display = "flex";
 };
 
-// ---------- ENVIAR POSTULACIÓN ----------
 window.enviar = async () => {
   const discord = document.getElementById("discord").value.trim();
   const motivo = document.getElementById("motivo").value.trim();
@@ -177,81 +161,10 @@ window.enviar = async () => {
     alert("❌ Error al enviar");
     console.error(error);
   } else {
-    alert("✅ Postulación enviada");
+    alert("✅ Postulación enviada y guardada");
     document.getElementById("modal").style.display = "none";
   }
 };
-
-// ---------- ESTADO POSTULACIONES ----------
-async function cargarEstado() {
-  const { data } = await supabase
-    .from("config")
-    .select("value")
-    .eq("key", "soporte_abierto")
-    .single();
-
-  const abierta = data.value;
-  const alert = document.getElementById("alert-soporte");
-  const btn = document.getElementById("btn-postular");
-
-  if (abierta === true) {
-    alert.textContent = "🟢 Postulación ABIERTA";
-    alert.style.color = "#43b581";
-    btn.disabled = false;
-    btn.className = "btn-open";
-  } else {
-    alert.textContent = "🔴 Postulación CERRADA";
-    alert.style.color = "#f04747";
-    btn.disabled = true;
-    btn.className = "btn-closed";
-  }
-}
-
-// ---------- ABRIR / CERRAR ----------
-window.togglePostulaciones = async () => {
-  const { data } = await supabase
-    .from("config")
-    .select("value")
-    .eq("key", "soporte_abierto")
-    .single();
-
-  await supabase
-    .from("config")
-    .update({ value: !data.value })
-    .eq("key", "soporte_abierto");
-
-  cargarEstado();
-};
-
-// ---------- VER POSTULACIONES ----------
-window.verPostulaciones = async () => {
-  document.getElementById("modal-postulaciones").style.display = "flex";
-
-  const { data } = await supabase
-    .from("postulaciones")
-    .select("*")
-    .eq("rango", "soporte")
-    .order("id", { ascending: false });
-
-  const lista = document.getElementById("lista-postulaciones");
-  lista.innerHTML = "";
-
-  data.forEach(p => {
-    lista.innerHTML += `
-      <div style="background:#2b2d31;padding:10px;border-radius:10px;margin-bottom:10px">
-        <b>${p.discord}</b><br>
-        <small>${p.motivo}</small>
-      </div>
-    `;
-  });
-};
-
-window.cerrarPostulaciones = () => {
-  document.getElementById("modal-postulaciones").style.display = "none";
-};
-
-// ---------- INICIO ----------
-cargarEstado();
 </script>
 
 </body>
