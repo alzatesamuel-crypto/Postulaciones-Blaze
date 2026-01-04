@@ -12,92 +12,106 @@ body{
   background:radial-gradient(circle at top,#111,#000);
   color:#e4e6eb;
 }
-.container{max-width:900px;margin:auto;padding:40px 20px}
-h1{text-align:center;margin-bottom:30px}
-
+.container{
+  max-width:800px;
+  margin:auto;
+  padding:40px 20px
+}
 .card{
-  background:#0f1115;
+  background:linear-gradient(180deg,#0f1115,#0a0b0e);
   border-radius:16px;
   padding:30px;
   box-shadow:0 0 40px rgba(0,0,0,.8);
 }
-
-button{
+h1{text-align:center}
+.question{
+  margin-top:30px;
+}
+label{
+  font-size:16px;
+  display:block;
+  margin-bottom:10px
+}
+input, textarea, select{
+  width:100%;
   padding:12px;
   border-radius:10px;
   border:none;
-  font-weight:bold;
-  cursor:pointer;
-  font-size:15px;
-  width:100%;
-  margin-top:20px;
-}
-.btn{background:#43b581;color:#fff}
-
-textarea{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:8px;
-  border:none;
   background:#2b2d31;
   color:white;
-  min-height:90px;
+  font-size:15px
 }
-
-.step{display:none}
-.step.active{display:block}
+button{
+  margin-top:30px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#43b581,#2ea043);
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer
+}
 
 /* ADMIN */
-#adminBtn{
+.admin-btn{
   position:fixed;
-  bottom:10px;
-  right:10px;
-  width:14px;
-  height:14px;
+  bottom:20px;
+  right:20px;
   background:#5865f2;
-  border-radius:50%;
-  opacity:.15;
+  padding:12px 16px;
+  border-radius:10px;
+  z-index:100
 }
-#adminBtn:hover{opacity:.6}
-
-#adminPanel{
+.admin-panel{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.95);
-  overflow:auto;
-  padding:30px;
+  background:#0b0d10;
+  z-index:200;
+  overflow-y:auto;
 }
-
 .post{
-  background:#1c1f26;
-  border-radius:12px;
+  background:#111;
   padding:20px;
-  margin-bottom:20px;
+  border-radius:12px;
+  margin-bottom:20px
 }
-.section{margin-bottom:8px}
-.delete{background:#f04747;color:white}
+.delete{
+  background:#f04747;
+  margin-top:10px
+}
 </style>
 </head>
 
 <body>
 
+<button class="admin-btn" onclick="abrirAdmin()">🛠 Admin</button>
+
 <div class="container">
-<h1>Postulación Staff – The Blaze Java</h1>
+<h1>Postulación | Soporte</h1>
 
 <div class="card">
-<div id="steps"></div>
-<button class="btn" onclick="next()">Continuar</button>
+  <div id="form">
+    <div class="question">
+      <label id="pregunta"></label>
+      <div id="input"></div>
+    </div>
+    <button onclick="siguiente()" id="btn">Siguiente</button>
+  </div>
 </div>
 </div>
 
-<div id="adminBtn" onclick="adminLogin()"></div>
-
-<div id="adminPanel">
-<h2>Panel Admin – Postulaciones</h2>
-<div id="posts"></div>
-<button onclick="closeAdmin()">Cerrar</button>
+<!-- PANEL ADMIN -->
+<div class="admin-panel" id="admin">
+<div class="container">
+<h1>Panel Admin</h1>
+<input id="pass" type="password" placeholder="Contraseña admin">
+<button onclick="loginAdmin()">Entrar</button>
+<div id="lista"></div>
+<button class="delete" onclick="cerrarAdmin()">Cerrar panel</button>
+</div>
 </div>
 
 <script type="module">
@@ -109,116 +123,97 @@ const supabase = createClient(
 );
 
 const preguntas = [
-["id","¿Tienes conocimientos en la ID? Si es así, envíanos tu ID"],
-["sanciones","¿Qué sanciones has tenido en Minecraft?"],
-["sanciones_dc","¿Qué sanciones has tenido en Discord de TheBlaze?"],
-["nick_mc","¿Cuál es tu nick de Minecraft?"],
-["activo","¿Eres activo en Minecraft?"],
-["tiempo_mc","¿Cuánto tiempo llevas jugando Minecraft?"],
-["nick_dc","¿Cuál es tu nick de Discord?"],
-["spam","¿Cuál es la diferencia entre Spam y Flood?"],
-["warn","¿Qué es un Warn? Explícalo con tus palabras"],
-["premium","¿Tu cuenta es Premium?"],
-["edad","¿Cuántos años tienes?"],
-["bots","Dime 10 bots que NO estén en TheBlaze"],
-["staff_otro","¿Eres staff en otra network?"],
-["rol","¿Crees que los staff merecen su rango?"],
-["exp_staff","¿Tienes experiencia como staff?"],
-["exp_prog","¿Tienes experiencia como programador?"],
-["ilegal","Si alguien hace algo ilegal, ¿qué harías?"],
-["cmd_dc","Dime 10 comandos útiles para moderar en Discord"],
-["cmd_mc","Dime 10 comandos útiles en Minecraft"],
-["amigo","Si tu amigo hace algo ilegal en Discord, ¿qué harías?"],
-["corrupto","¿Qué harías si encuentras un staff corrupto?"]
+ {k:"id_conocimiento", t:"¿Tienes conocimientos en la ID? Si es así envíanos tu ID", type:"textarea"},
+ {k:"sanciones", t:"¿Qué sanciones tienes o has tenido en Minecraft?", type:"textarea"},
+ {k:"sanciones_dc", t:"¿Qué sanciones tienes en Discord de TheBlaze?", type:"textarea"},
+ {k:"nick_mc", t:"¿Cuál es tu Nick de Minecraft?", type:"input"},
+ {k:"activo_mc", t:"¿Eres activo en Minecraft?", type:"select", o:["Si","No"]},
+ {k:"tiempo_mc", t:"¿Cuánto tiempo llevas jugando Minecraft?", type:"input"},
+ {k:"discord", t:"¿Cuál es tu Nick de Discord?", type:"input"},
+ {k:"diferencia_spam", t:"¿Cuál es la diferencia entre Spam y Flood?", type:"textarea"},
+ {k:"warn", t:"¿Qué es un Warn? Escríbelo con tus palabras", type:"textarea"},
+ {k:"premium", t:"¿Eres Premium?", type:"select", o:["Si","No"]},
+ {k:"edad", t:"¿Cuántos años tienes?", type:"select", o:["Menos de 12","12","Más de 12"]},
+ {k:"bots", t:"Dime 10 bots que NO estén en TheBlaze", type:"textarea"},
+ {k:"staff_otro", t:"¿Eres staff de otra network?", type:"select", o:["Si","No"]},
+ {k:"acepta_staff", t:"¿Aceptas que todos los staff tengan el mismo rol?", type:"select", o:["Si","No"]},
+ {k:"exp_staff", t:"¿Tienes experiencia como staff?", type:"textarea"},
+ {k:"exp_programador", t:"¿Tienes experiencia como programador?", type:"textarea"},
+ {k:"ilegal_servidor", t:"Si alguien hace algo ilegal en el servidor, ¿qué harías?", type:"textarea"},
+ {k:"cmds_discord", t:"Dime 10 comandos útiles para moderar en Discord", type:"textarea"},
+ {k:"cmds_nautic", t:"Dime 10 comandos útiles para jugar Nautic", type:"textarea"},
+ {k:"amigo_ilegal", t:"Si tu amigo hace algo ilegal en Discord, ¿qué harías?", type:"textarea"},
+ {k:"staff_corrupto", t:"¿Qué harías si encuentras un staff corrupto en TheBlaze?", type:"textarea"}
 ];
 
-let step = 0;
-let respuestas = {};
+let i = 0;
+const respuestas = {};
 
-const stepsDiv = document.getElementById("steps");
+const pregunta = document.getElementById("pregunta");
+const inputDiv = document.getElementById("input");
+const btn = document.getElementById("btn");
 
-preguntas.forEach((p,i)=>{
-  stepsDiv.innerHTML += `
-  <div class="step ${i===0?'active':''}" data-key="${p[0]}">
-    <h3>${p[1]}</h3>
-    <textarea></textarea>
-  </div>`;
-});
+function render(){
+  const p = preguntas[i];
+  pregunta.innerText = p.t;
+  inputDiv.innerHTML = "";
 
-window.next = async () => {
-  const actual = document.querySelector(".step.active");
-  const key = actual.dataset.key;
-  const value = actual.querySelector("textarea").value.trim();
-
-  if(!value){
-    alert("Debes responder la pregunta");
-    return;
+  let el;
+  if(p.type==="textarea"){
+    el=document.createElement("textarea");
+  }else if(p.type==="select"){
+    el=document.createElement("select");
+    p.o.forEach(v=>{
+      const op=document.createElement("option");
+      op.text=v; el.add(op);
+    });
+  }else{
+    el=document.createElement("input");
   }
+  el.id="respuesta";
+  inputDiv.appendChild(el);
 
-  respuestas[key] = value;
-  actual.classList.remove("active");
-  step++;
-
-  if(step < preguntas.length){
-    document.querySelectorAll(".step")[step].classList.add("active");
-  } else {
-    const { error } = await supabase
-      .from("postulaciones")
-      .insert([{ datos: respuestas }]);
-
-    if(error){
-      alert("❌ Error al enviar");
-      console.error(error);
-    } else {
-      alert("✅ Postulación enviada correctamente");
-      location.reload();
-    }
-  }
-};
-
-/* ADMIN */
-window.adminLogin = async () => {
-  const pass = prompt("Contraseña admin");
-  if(pass !== "1.21 #3 parcelas") return;
-
-  document.getElementById("adminPanel").style.display = "block";
-  loadPosts();
-};
-
-async function loadPosts(){
-  const { data, error } = await supabase
-    .from("postulaciones")
-    .select("*")
-    .order("id",{ascending:false});
-
-  if(error){ console.error(error); return; }
-
-  const div = document.getElementById("posts");
-  div.innerHTML = "";
-
-  data.forEach(p=>{
-    div.innerHTML += `
-    <div class="post">
-      ${Object.entries(p.datos).map(([k,v]) =>
-        `<div class="section"><b>${k}</b>: ${v}</div>`
-      ).join("")}
-      <button class="delete" onclick="del(${p.id})">Eliminar</button>
-    </div>`;
-  });
+  btn.innerText = i === preguntas.length-1 ? "Enviar Postulación" : "Siguiente";
 }
 
-window.del = async (id) => {
-  if(confirm("¿Eliminar postulación?")){
-    await supabase.from("postulaciones").delete().eq("id",id);
-    loadPosts();
+window.siguiente = async ()=>{
+  const val = document.getElementById("respuesta").value;
+  if(!val) return alert("Responde la pregunta");
+  respuestas[preguntas[i].k]=val;
+
+  if(i === preguntas.length-1){
+    await supabase.from("postulaciones").insert([respuestas]);
+    alert("✅ Postulación enviada correctamente");
+    location.reload();
+  }else{
+    i++; render();
   }
 };
 
-window.closeAdmin = () =>
-  document.getElementById("adminPanel").style.display="none";
+render();
+
+/* ADMIN */
+window.abrirAdmin=()=>admin.style.display="block";
+window.cerrarAdmin=()=>admin.style.display="none";
+
+window.loginAdmin=async()=>{
+ if(pass.value!=="1.21 #3 parcelas") return alert("❌ Incorrecta");
+ const {data}=await supabase.from("postulaciones").select("*").order("created_at",{ascending:false});
+ lista.innerHTML="";
+ data.forEach(p=>{
+   lista.innerHTML+=`<div class="post"><pre>${JSON.stringify(p,null,2)}</pre>
+   <button class="delete" onclick="borrar(${p.id})">Borrar</button></div>`;
+ });
+};
+
+window.borrar=async(id)=>{
+ await supabase.from("postulaciones").delete().eq("id",id);
+ loginAdmin();
+};
 </script>
 
 </body>
 </html>
+
 
 
