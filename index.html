@@ -21,9 +21,6 @@ h1{text-align:center;margin-bottom:40px}
     border-radius:16px;
     padding:25px;
     box-shadow:0 0 40px rgba(0,0,0,.8);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between
 }
 .icon{
     width:50px;height:50px;
@@ -32,30 +29,21 @@ h1{text-align:center;margin-bottom:40px}
     display:flex;align-items:center;justify-content:center;
     margin-bottom:20px
 }
-.card h2{margin:0 0 10px}
-.card p{color:#9da1a9;font-size:14px}
-
 .alert{
     margin:20px 0;
     padding:12px;
     border-radius:10px;
-    background:rgba(240,71,71,.15);
-    color:#f04747;
-    display:flex;
-    gap:8px;
-    font-size:14px
+    background:rgba(67,181,129,.15);
+    color:#43b581;
 }
-
 button{
     padding:12px;
     border-radius:10px;
     border:none;
     font-weight:bold;
     cursor:pointer;
-    font-size:15px
 }
-.btn-open{background:linear-gradient(135deg,#43b581,#2ea043);color:white}
-.btn-closed{background:#2b2d31;color:#72767d;cursor:not-allowed}
+.btn-open{background:#2ea043;color:white}
 .admin{margin-top:10px;background:#5865f2;color:white}
 
 /* MODAL */
@@ -73,12 +61,10 @@ button{
     border-radius:16px;
     max-width:600px;
     width:90%;
-    text-align:left;
     max-height:80vh;
-    overflow-y:auto; /* Scroll interno */
+    overflow-y:auto;
 }
-.modal h3{margin-top:0}
-label{display:block;margin-top:15px;font-size:14px}
+label{display:block;margin-top:15px}
 input, textarea{
     width:100%;
     padding:10px;
@@ -88,34 +74,8 @@ input, textarea{
     background:#2b2d31;
     color:white;
 }
-textarea{resize:vertical;}
-.modal button{margin-top:20px;width:100%;background:#5865f2;color:white;cursor:pointer}
-
-/* Botón revisar postulaciones */
-#btn-ver-postulaciones {
-  background:#5865f2;
-  color:white;
-  border-radius:10px;
-  padding:12px;
-  cursor:pointer;
-  width:100%;
-  max-width:300px;
-  margin:20px auto;
-  display:block;
-}
-#btn-ver-postulaciones:hover{opacity:0.85;}
-
-/* Botón eliminar dentro del modal */
-.btn-eliminar{
-  background:#f04747;
-  color:white;
-  padding:6px 12px;
-  border-radius:6px;
-  font-size:12px;
-  margin-top:5px;
-  cursor:pointer;
-}
-.btn-eliminar:hover{opacity:0.8;}
+.modal button{margin-top:20px;width:100%;background:#5865f2;color:white}
+.btn-eliminar{background:#f04747;color:white;padding:6px;border-radius:6px;margin-top:10px}
 </style>
 </head>
 
@@ -125,159 +85,110 @@ textarea{resize:vertical;}
 <h1>Postulaciones The Blaze Java</h1>
 
 <div class="cards">
-
-<!-- SOPORTE -->
 <div class="card">
-<div>
 <div class="icon">📄</div>
 <h2>Rango SOPORTE</h2>
-<p>Postulación para formar parte del equipo de soporte del clan.</p>
-<div class="alert" id="alert-soporte"></div>
+<p>Postulación para formar parte del equipo de soporte.</p>
+<div class="alert">🟢 Postulación ABIERTA</div>
+<button class="btn-open" onclick="abrir()">Postularse</button>
+<button class="admin" onclick="mostrarPostulaciones()">Ver postulaciones (Admin)</button>
 </div>
-<button id="btn-soporte"></button>
-<button class="admin" onclick="adminToggle('soporte')">Admin: Abrir / Cerrar</button>
+</div>
 </div>
 
-</div>
-
-<!-- Botón para que admins vean postulaciones -->
-<button id="btn-ver-postulaciones" onclick="mostrarPostulaciones()">Ver postulaciones enviadas</button>
-
-<!-- MODAL -->
 <div class="modal" id="modal">
 <div class="modal-content">
 <h3 id="modalTitle"></h3>
 <div id="questions"></div>
-<button onclick="cerrar()">Enviar Postulación</button>
+<button onclick="enviar()">Enviar</button>
 </div>
 </div>
 
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "PEGA_AQUI_TU_APIKEY",
+  authDomain: "TU_PROYECTO.firebaseapp.com",
+  projectId: "TU_PROYECTO"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.fb = { collection, addDoc, getDocs, deleteDoc, doc };
+</script>
+
 <script>
-const preguntas = {
-soporte:[
+const preguntas = [
 "Tu nombre de Discord:",
 "¿Por qué quieres ser soporte?",
-"¿Cuánto tiempo podrías dedicar al clan?",
-"¿Tienes experiencia en soporte o atención a jugadores?"
-]
-};
+"¿Cuánto tiempo puedes dedicar?",
+"¿Tienes experiencia?"
+];
 
 const adminPassword = "1.21 #3 parcelas";
 
-function estado(r){ return localStorage.getItem(r) === "abierto"; }
-
-function actualizar(r){
-  const btn = document.getElementById("btn-"+r);
-  const alert = document.getElementById("alert-"+r);
-
-  if(estado(r)){
-    alert.innerHTML = "🟢 Postulación ABIERTA";
-    alert.style.background = "rgba(67,181,129,.15)";
-    alert.style.color = "#43b581";
-    btn.textContent = "Postularse";
-    btn.className = "btn-open";
-    btn.onclick = () => abrir(r);
-  }else{
-    alert.innerHTML = "🔒 Postulación CERRADA";
-    alert.style.background = "rgba(240,71,71,.15)";
-    alert.style.color = "#f04747";
-    btn.textContent = "Cerrada";
-    btn.className = "btn-closed";
-    btn.onclick = null;
-  }
-}
-
-function adminToggle(r){
-  const pass = prompt("Introduce la contraseña de administrador para cambiar el estado de: " + r.toUpperCase());
-  if(pass === adminPassword){
-    localStorage.setItem(r, estado(r) ? "cerrado" : "abierto");
-    actualizar(r);
-    alert("Estado cambiado correctamente.");
-  } else {
-    alert("Contraseña incorrecta. No tienes permiso.");
-  }
-}
-
-function abrir(r){
-  document.getElementById("modal").style.display = "flex";
-  document.getElementById("modalTitle").textContent = "Postulación - " + r.toUpperCase();
-  const q = document.getElementById("questions");
-  q.innerHTML = "";
-  preguntas[r].forEach(p=>{
-      if(p.toLowerCase().includes("por qué") || p.toLowerCase().includes("experiencia") || p.toLowerCase().includes("cuánto tiempo")){
-          q.innerHTML += `<label>${p}</label><textarea required></textarea>`;
-      } else {
-          q.innerHTML += `<label>${p}</label><input type="text" required>`;
-      }
+function abrir(){
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modalTitle").textContent="Postulación SOPORTE";
+  const q=document.getElementById("questions");
+  q.innerHTML="";
+  preguntas.forEach(p=>{
+    q.innerHTML+=`<label>${p}</label><textarea required></textarea>`;
   });
 }
 
-function cerrar() {
-  const modalTitle = document.getElementById("modalTitle").textContent.toLowerCase().replace("postulación - ", "");
-  const inputs = document.querySelectorAll("#questions input, #questions textarea");
-  const respuestas = [];
-  inputs.forEach(input => respuestas.push(input.value.trim()));
+async function enviar(){
+  const inputs=document.querySelectorAll("#questions textarea");
+  const respuestas=[];
+  inputs.forEach(i=>respuestas.push(i.value.trim()));
 
-  if(!respuestas[0]){
-    alert("Debes ingresar tu nombre de Discord.");
-    return;
-  }
+  if(!respuestas[0]){ alert("Completa todo"); return; }
 
-  let actuales = JSON.parse(localStorage.getItem("postulaciones_" + modalTitle)) || [];
-  actuales.push(respuestas);
-  localStorage.setItem("postulaciones_" + modalTitle, JSON.stringify(actuales));
-
-  document.getElementById("modal").style.display = "none";
-  alert("Postulación enviada con éxito.");
-}
-
-function mostrarPostulaciones() {
-  const pass = prompt("Ingresa la contraseña de administrador para ver las postulaciones:");
-  if(pass !== adminPassword){ alert("Contraseña incorrecta."); return; }
-
-  let todasPostulaciones = "";
-  ["soporte"].forEach(rango => {
-    const data = JSON.parse(localStorage.getItem("postulaciones_" + rango)) || [];
-    if(data.length > 0) {
-      todasPostulaciones += `<h3>Postulaciones para ${rango.toUpperCase()}</h3>`;
-      data.forEach((respuestas, i) => {
-        todasPostulaciones += `<div style="border:1px solid #555; padding:10px; margin-bottom:10px; border-radius:10px;">`;
-        todasPostulaciones += `<b>Postulación #${i+1}</b><br>`;
-        preguntas[rango].forEach((preg, idx) => {
-          todasPostulaciones += `<i>${preg}</i> ${respuestas[idx] || "No respondido"}<br>`;
-        });
-        todasPostulaciones += `<button class="btn-eliminar" onclick="eliminarPostulacion('${rango}', ${i})">Eliminar</button>`;
-        todasPostulaciones += "</div>";
-      });
-    }
+  await fb.addDoc(fb.collection(db,"postulaciones"),{
+    rango:"soporte",
+    respuestas,
+    fecha:new Date().toISOString()
   });
 
-  if(!todasPostulaciones) {
-    todasPostulaciones = "<p>No hay postulaciones guardadas.</p>";
-  }
-
-  document.getElementById("modalTitle").textContent = "Postulaciones enviadas";
-  document.getElementById("questions").innerHTML = todasPostulaciones;
-  document.getElementById("modal").style.display = "flex";
+  document.getElementById("modal").style.display="none";
+  alert("Postulación enviada correctamente");
 }
 
-function eliminarPostulacion(rango, index){
-  if(!confirm("¿Seguro que quieres eliminar esta postulación?")) return;
-  let data = JSON.parse(localStorage.getItem("postulaciones_" + rango)) || [];
-  data.splice(index, 1);
-  localStorage.setItem("postulaciones_" + rango, JSON.stringify(data));
-  mostrarPostulaciones(); // refresca la lista
+async function mostrarPostulaciones(){
+  const pass=prompt("Contraseña admin:");
+  if(pass!==adminPassword) return alert("Incorrecta");
+
+  const snap=await fb.getDocs(fb.collection(db,"postulaciones"));
+  let html="";
+  snap.forEach(d=>{
+    const data=d.data();
+    html+=`
+    <div style="border:1px solid #555;padding:10px;margin-bottom:10px">
+      ${data.respuestas.join("<br>")}
+      <button class="btn-eliminar" onclick="eliminar('${d.id}')">Eliminar</button>
+    </div>`;
+  });
+
+  document.getElementById("modalTitle").textContent="Postulaciones";
+  document.getElementById("questions").innerHTML=html||"No hay postulaciones";
+  document.getElementById("modal").style.display="flex";
 }
 
-// Inicialización
-["soporte"].forEach(r=>{
-  if(!localStorage.getItem(r)) localStorage.setItem(r,"abierto");
-  actualizar(r);
-});
+async function eliminar(id){
+  if(!confirm("Eliminar?"))return;
+  await fb.deleteDoc(fb.doc(db,"postulaciones",id));
+  mostrarPostulaciones();
+}
 </script>
 
 </body>
 </html>
+
 
 
 
